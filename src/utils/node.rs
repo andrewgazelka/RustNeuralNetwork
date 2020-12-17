@@ -1,4 +1,4 @@
-use crate::utils::sigmoid;
+use crate::utils::transfer_functions::sigmoid;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Node {

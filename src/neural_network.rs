@@ -1,7 +1,5 @@
-use crate::matrix::Matrix;
-use crate::node::Node;
-
-// error = Sum(correct_i -output_i)^2
+use crate::utils::node::Node;
+use crate::utils::matrix::Matrix;
 
 pub struct NeuralNetwork {
     columns: Vec<Vec<Node>>,

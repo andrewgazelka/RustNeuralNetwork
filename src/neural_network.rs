@@ -1,21 +1,5 @@
 use crate::matrix::Matrix;
-use crate::utils::sigmoid;
-
-
-#[derive(Copy, Clone, Debug)]
-struct Node {
-    input_value: f64,
-    sigmoid: f64,
-}
-
-impl Default for Node {
-    fn default() -> Self {
-        Node {
-            input_value: 0.0,
-            sigmoid: 0.5,
-        }
-    }
-}
+use crate::node::Node;
 
 pub struct NeuralNetwork {
     columns: Vec<Vec<Node>>,
@@ -23,7 +7,36 @@ pub struct NeuralNetwork {
 }
 
 impl NeuralNetwork {
-    pub fn new(node_counts: &Vec<usize>, init: f64) -> NeuralNetwork {
+    pub fn outputs(&self) -> String {
+        let mut s = String::new();
+        s.push('\n');
+        let mut depth = 0;
+
+        loop {
+            let mut empty = true;
+            for column_idx in 0..self.columns.len() {
+                let column = &self.columns[column_idx];
+                if let Some(node) = column.get(depth) {
+                    empty = false;
+                    s.push_str(&node.sigmoid.to_string());
+                    s.push_str("    ");
+                } else {
+                    s.push(' ')
+                }
+            }
+            if empty {
+                break;
+            }
+            depth += 1;
+            s.push('\n');
+        }
+        s
+    }
+}
+
+
+impl NeuralNetwork {
+    pub fn new(node_counts: &[usize], init: f64) -> NeuralNetwork {
         let mut columns = Vec::with_capacity(node_counts.len());
         let mut weight_matrices = Vec::with_capacity(node_counts.len() - 1);
 
@@ -41,22 +54,18 @@ impl NeuralNetwork {
     }
 
     fn depth(&self) -> usize {
-        self.weight_matrices.len()
+        self.columns.len()
     }
 
     fn matrix_at(&self, i: usize) -> &Matrix<f64> {
         self.weight_matrices.get(i).unwrap()
     }
 
-    fn set_inputs(&mut self, depth: usize, inputs: &Vec<f64>) {
-        let vec = &mut self.columns[depth];
-        for idx in 0..vec.len() {
-            let input_value = inputs[idx];
-            let sigmoid = sigmoid(input_value);
-            vec[idx] = Node {
-                input_value,
-                sigmoid,
-            }
+    fn set_inputs(&mut self, depth: usize, inputs: &[f64]) {
+        let column = &mut self.columns[depth];
+        for idx in 0..column.len() {
+            let input = inputs[idx];
+            column[idx] = Node::from_input(input);
         }
     }
 
@@ -67,8 +76,8 @@ impl NeuralNetwork {
 
     pub fn propagate(&mut self, inputs: &[f64]) {
         let first_column = &mut self.columns[0];
-        for (i, node) in first_column.iter_mut().enumerate() {
-            node.input_value = inputs[i];
+        for i in 0..first_column.len() {
+            first_column[i] = Node::from_input(inputs[i]);
         }
         self.propagate_helper();
     }

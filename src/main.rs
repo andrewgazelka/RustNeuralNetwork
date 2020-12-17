@@ -2,6 +2,7 @@ use crate::neural_network::NeuralNetwork;
 
 mod neural_network;
 mod utils;
+mod files;
 
 fn main() {
     let node_counts: Vec<usize> = vec![1, 1, 1];

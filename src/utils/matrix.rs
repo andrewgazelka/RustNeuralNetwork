@@ -36,6 +36,15 @@ impl <T: Display> Matrix<T>{
     row-wise matrix
 */
 impl<T> Matrix<T> {
+
+    pub fn from_vec(m: usize, n:usize, vector: Vec<T>) -> Matrix<T> {
+        return Matrix {
+            data: vector,
+            columns: n,
+            rows: m
+        }
+    }
+
     pub fn idx(&self, m: usize, n: usize) -> usize {
         m * self.columns + n
     }

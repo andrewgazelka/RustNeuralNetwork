@@ -1,3 +1,4 @@
+use std::fmt::Display;
 
 pub struct Matrix<T> {
     data: Vec<T>,
@@ -5,26 +6,7 @@ pub struct Matrix<T> {
     pub rows: usize,
 }
 
-struct MatrixRowIterator<'a, T> {
-    row_on: usize,
-    matrix: &'a Matrix<T>,
-}
-
-impl<'a, T> Iterator for MatrixRowIterator<'a, T> {
-    type Item = &'a [T];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.row_on == self.matrix.rows {
-            return None;
-        }
-        let row = self.matrix.row_at(self.row_on);
-        self.row_on += 1;
-        Some(row)
-    }
-}
-
-impl <T: Clone> Matrix<T> {
-
+impl<T: Clone> Matrix<T> {
     /**
     Create an m by n matrix with m rows and n columns
     */
@@ -38,22 +20,33 @@ impl <T: Clone> Matrix<T> {
     }
 }
 
+impl <T: Display> Matrix<T>{
+    pub fn string_repr(&self) -> String {
+        let x: Vec<_> = self.row_iterator().map(|row| {
+            let row_str: Vec<_> = row.iter().map(|elem| elem.to_string()).collect();
+            row_str.join("  ")
+        }).collect();
+        x.join("\n")
+    }
+
+
+}
+
 /**
     row-wise matrix
 */
 impl<T> Matrix<T> {
-
     pub fn idx(&self, m: usize, n: usize) -> usize {
-        return m * self.columns + n;
+        m * self.columns + n
     }
 
     pub fn row_iterator(&self) -> impl Iterator<Item=&[T]> {
-        return MatrixRowIterator {
-            row_on: 0,
-            matrix: self,
-        };
+        self.data.chunks(self.columns)
     }
 
+    pub fn row_iterator_mut(&mut self) -> impl Iterator<Item=&mut [T]> {
+        self.data.chunks_mut(self.columns)
+    }
 
     pub fn row_at(&self, row_idx: usize) -> &[T] {
         let from = self.idx(row_idx, 0);
@@ -61,10 +54,19 @@ impl<T> Matrix<T> {
         &self.data[from..to]
     }
 
+    #[allow(dead_code)]
+    pub fn row_at_mut(&mut self, row_idx: usize) -> &mut [T] {
+        let from = self.idx(row_idx, 0);
+        let to = self.idx(row_idx + 1, 0);
+        &mut self.data[from..to]
+    }
+
+    #[allow(dead_code)]
     pub fn get(&self, m: usize, n: usize) -> Option<&T> {
         self.data.get(self.idx(m, n))
     }
 
+    #[allow(dead_code)]
     pub fn set(&mut self, row: usize, column: usize, value: T) {
         let idx = self.idx(row, column);
         self.data[idx] = value;

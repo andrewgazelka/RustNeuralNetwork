@@ -10,8 +10,13 @@ impl Node {
     pub fn from_input(input: f64) -> Node {
         Node {
             input,
-            sigmoid: sigmoid(input)
+            sigmoid: sigmoid(input),
         }
+    }
+
+    pub fn d_sigmoid(&self) -> f64 {
+        let sig = self.sigmoid;
+        sig * (1.0 - sig)
     }
 }
 

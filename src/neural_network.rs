@@ -1,13 +1,15 @@
 use crate::matrix::Matrix;
 use crate::node::Node;
 
+// error = Sum(correct_i -output_i)^2
+
 pub struct NeuralNetwork {
     columns: Vec<Vec<Node>>,
     weight_matrices: Vec<Matrix<f64>>,
 }
 
 impl NeuralNetwork {
-    pub fn outputs(&self) -> String {
+    pub fn output_string(&self) -> String {
         let mut s = String::new();
         s.push('\n');
         let mut depth = 0;
@@ -28,6 +30,17 @@ impl NeuralNetwork {
                 break;
             }
             depth += 1;
+            s.push('\n');
+        }
+        s
+    }
+
+    pub fn weight_string(&self) -> String {
+        let mut s = String::new();
+        s.push('\n');
+        for matrix in &self.weight_matrices {
+            s.push_str(&matrix.string_repr());
+            s.push('\n');
             s.push('\n');
         }
         s
@@ -69,9 +82,9 @@ impl NeuralNetwork {
         }
     }
 
-    pub fn get_outputs(&self) -> Vec<f64> {
+    pub fn outputs(&self) -> impl Iterator<Item=f64> + '_ {
         let last = self.columns.last().unwrap();
-        last.iter().map(|x| x.sigmoid).collect()
+        last.iter().map(|x| x.sigmoid)
     }
 
     pub fn propagate(&mut self, inputs: &[f64]) {
@@ -80,6 +93,48 @@ impl NeuralNetwork {
             first_column[i] = Node::from_input(inputs[i]);
         }
         self.propagate_helper();
+    }
+
+    pub fn update_weights(&mut self, alpha: f64, expected_output: &[f64]) {
+
+        // derivative of error
+        let d_error: f64 = expected_output.iter().zip(self.outputs())
+            .map(|(expect, actual)| expect - actual).sum();
+
+        let mut f_values = Vec::with_capacity(self.columns.len());
+        self.columns.iter()
+            .rev()
+            .enumerate()
+            .filter(|(i, _)| *i != self.columns.len() - 1) // skip the last
+            .for_each(|(rev_column_idx, column)| {
+                let inner_vec = Vec::with_capacity(column.len());
+                f_values.push(inner_vec);
+                let weight_matrix = self.weight_matrices.get(self.weight_matrices.len() - rev_column_idx);
+                for (node_idx, node) in column.iter().enumerate() {
+                    let scalar = if rev_column_idx == 0 {
+                        d_error
+                    } else {
+                        weight_matrix.unwrap().row_at(node_idx).iter().enumerate()
+                            .map(|(next_node_idx, weight)| weight * weight * f_values[rev_column_idx - 1][next_node_idx])
+                            .sum()
+                    } * node.d_sigmoid();
+                    f_values[rev_column_idx].push(scalar);
+                }
+            });
+
+        for (matrix_idx, column_f_values) in f_values.iter().rev().enumerate() {
+            let matrix = &mut self.weight_matrices[matrix_idx];
+            for (from_node_idx, row) in matrix.row_iterator_mut().enumerate() {
+                let from_node = &self.columns[matrix_idx][from_node_idx];
+                for (to_node_idx, weight) in row.iter_mut().enumerate() {
+                    let f_value = column_f_values[to_node_idx];
+                    let from_node_output = from_node.sigmoid; // TODO: check
+                    let w_error = f_value * from_node_output;
+                    let change = alpha * w_error;
+                    *weight -= change;
+                }
+            }
+        }
     }
 
     fn propagate_helper(&mut self) {

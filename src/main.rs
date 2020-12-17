@@ -6,10 +6,29 @@ mod utils;
 mod node;
 
 fn main() {
-    let node_counts: Vec<usize> = vec![4, 3, 1];
+    let node_counts: Vec<usize> = vec![1, 1, 1];
+
     let mut nn = NeuralNetwork::new(&node_counts, 1.0);
 
-    let start = vec![4.0, 3.0, 3.0, 3.0];
+    let alpha = 0.5;
+
+    let start = vec![4.0];
+
+    println!("outputs {}", nn.output_string());
+    println!("weights {}", nn.weight_string());
+
     nn.propagate(&start);
-    println!("outputs {}", nn.outputs());
+
+
+
+    let expected = vec![1.0];
+
+    for _ in 0..10000 {
+        nn.update_weights(alpha, &expected);
+        nn.propagate(&start);
+    }
+
+    println!("weights {}", nn.weight_string());
+
+    println!("outputs {}", nn.output_string());
 }

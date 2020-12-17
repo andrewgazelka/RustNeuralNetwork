@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 byteorder = "1.3.4"
 clap = "3.0.0-beta.2"
+term_size = "1.0.0-beta1"
+itertools = "0.9"

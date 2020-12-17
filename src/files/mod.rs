@@ -1,2 +1,2 @@
 
-mod mnist;
+pub mod mnist;

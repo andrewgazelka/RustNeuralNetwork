@@ -45,6 +45,10 @@ impl<T> Matrix<T> {
         }
     }
 
+    pub fn size(&self) -> usize {
+        self.columns * self.rows
+    }
+
     pub fn idx(&self, m: usize, n: usize) -> usize {
         m * self.columns + n
     }

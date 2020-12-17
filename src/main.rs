@@ -1,33 +1,14 @@
-use crate::neural_network::NeuralNetwork;
+use std::io;
+use crate::files::mnist::MNIST;
 
 mod neural_network;
 mod utils;
 mod files;
 
-fn main() {
-    let node_counts: Vec<usize> = vec![1, 1, 1];
-
-    let mut nn = NeuralNetwork::new(&node_counts, 1.0);
-
-    let alpha = 0.5;
-
-    let start = vec![4.0];
-
-    println!("outputs {}", nn.output_string());
-    println!("weights {}", nn.weight_string());
-
-    nn.propagate(&start);
-
-
-
-    let expected = vec![1.0];
-
-    for _ in 0..10000 {
-        nn.update_weights(alpha, &expected);
-        nn.propagate(&start);
+fn main() -> Result<(), io::Error> {
+    let mnist = MNIST::new("data/train-labels", "data/train-images")?;
+    for x in mnist.images.iter() {
+        println!("{}", x.to_string())
     }
-
-    println!("weights {}", nn.weight_string());
-
-    println!("outputs {}", nn.output_string());
+    Ok(())
 }

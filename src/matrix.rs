@@ -1,4 +1,3 @@
-use std::intrinsics::min_align_of;
 
 pub struct Matrix<T> {
     data: Vec<T>,
@@ -11,7 +10,7 @@ struct MatrixRowIterator<'a, T> {
     matrix: &'a Matrix<T>,
 }
 
-impl<'a, T> Iterator for MatrixRowIterator<T> {
+impl<'a, T> Iterator for MatrixRowIterator<'a, T> {
     type Item = &'a [T];
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -24,10 +23,8 @@ impl<'a, T> Iterator for MatrixRowIterator<T> {
     }
 }
 
-/**
-    row-wise matrix
-*/
-impl<T> Matrix<T> {
+impl <T: Clone> Matrix<T> {
+
     /**
     Create an m by n matrix with m rows and n columns
     */
@@ -39,6 +36,12 @@ impl<T> Matrix<T> {
             rows: m,
         }
     }
+}
+
+/**
+    row-wise matrix
+*/
+impl<T> Matrix<T> {
 
     pub fn idx(&self, m: usize, n: usize) -> usize {
         return m * self.columns + n;
@@ -63,6 +66,7 @@ impl<T> Matrix<T> {
     }
 
     pub fn set(&mut self, row: usize, column: usize, value: T) {
-        self.data[self.idx(row, column)] = value;
+        let idx = self.idx(row, column);
+        self.data[idx] = value;
     }
 }

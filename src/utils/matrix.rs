@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::slice::Iter;
 
 pub struct Matrix<T> {
     data: Vec<T>,
@@ -38,11 +39,15 @@ impl <T: Display> Matrix<T>{
 impl<T> Matrix<T> {
 
     pub fn from_vec(m: usize, n:usize, vector: Vec<T>) -> Matrix<T> {
-        return Matrix {
+        Matrix {
             data: vector,
             columns: n,
             rows: m
         }
+    }
+
+    pub fn iterator(&self) -> impl Iterator<Item=&T> {
+        self.data.iter()
     }
 
     pub fn size(&self) -> usize {

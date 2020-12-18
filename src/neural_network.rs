@@ -6,6 +6,11 @@ pub struct NeuralNetwork {
     weight_matrices: Vec<Matrix<f64>>,
 }
 
+pub trait NetworkData {
+    fn input_vec(&self) -> Vec<f64>;
+    fn expected_output_vec(&self) -> Vec<f64>;
+}
+
 impl NeuralNetwork {
     pub fn output_string(&self) -> String {
         let mut s = String::new();
@@ -162,5 +167,23 @@ impl NeuralNetwork {
 
             self.set_inputs(depth + 1, &outputs)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::files::mnist::MNIST;
+    use std::io;
+
+    #[test]
+    fn it_works() -> Result<(), io::Error>{
+        let mnist = MNIST::new("data/train-labels", "data/train-images")?;
+
+        let input_size = mnist.image_size();
+
+        let inputs = vec![input_size, input_size];
+
+
+        Ok(())
     }
 }

@@ -54,38 +54,27 @@ fn gen_numbers(height: usize, columns: usize) -> Result<(), io::Error> {
             line_iterators.push(number.lines());
         }
 
+        let mut first = true;
         loop {
             let mut has_one = false;
-            for lines in &mut line_iterators {
+            for (i, lines) in line_iterators.iter_mut().enumerate() {
+                if first {
+                    print!("{}", images[i].label);
+                } else {
+                    print!(" ");
+                }
                 if let Some(line) = lines.next() {
                     has_one = true;
                     print!("{}", line);
+                    print!("|")
                 }
             }
             println!();
+            first = false;
             if !has_one {
                 break;
             }
         }
-
-        // let lines  = images.iter().map(|image| {
-        //     let x = image.to_string().lines();
-        //     x
-        // });
-
-
-        //
-        // for a in gp {
-        //
-        // }
-
-
-        // .group_by(|(i, str)| i);
-        // .group_by(|(i, line)| i);
-        // .group_by(|(i, s)| 1);
-
-
-        // let lines = images.iter().map(|image| image.to_string().lines().co);
     }
     Ok(())
 }

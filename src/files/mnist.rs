@@ -4,6 +4,7 @@ use std::io;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
+use crate::neural_network::NetworkData;
 use crate::utils::matrix::Matrix;
 
 pub type Pixel = bool;
@@ -11,6 +12,18 @@ pub type Pixel = bool;
 pub struct Image {
     pub label: u8,
     pub data: Matrix<bool>,
+}
+
+impl NetworkData for Image {
+    fn input_vec(&self) -> Vec<f64> {
+        self.data.iterator().map(|&x| if x { 1.0 } else { 0.0 }).collect()
+    }
+
+    fn expected_output_vec(&self) -> Vec<f64> {
+        let mut vec = vec![0.0; 10];
+        vec[self.label as usize] = 1.0;
+        vec
+    }
 }
 
 impl ToString for Image {
@@ -102,6 +115,10 @@ impl MNIST {
         Ok(MNIST {
             images
         })
+    }
+
+    pub fn image_size(&self) -> usize {
+        self.images.first().unwrap().data.size()
     }
 }
 

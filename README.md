@@ -1,6 +1,3 @@
 # Rust Neural Network
 
-Matrix
-
-
-$n
+A neural network built in Rust
